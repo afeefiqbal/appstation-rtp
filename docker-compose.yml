@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: rtb-laravel-app
+    container_name: rtb-app
+    ports:
+      - "9000:9000"
+    volumes:
+      - .:/var/www
+    depends_on:
+      - db
+    networks:
+      - rtbnet
+
+  db:
+    image: mysql:8
+    container_name: rtb-db
+    ports:
+      - "3307:3307"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: rtb
+      MYSQL_USER: rtbuser
+      MYSQL_PASSWORD: rtbpass
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - rtbnet
+
+  nginx:
+    image: nginx:alpine
+    container_name: rtb-nginx
+    ports:
+      - "8000:80"
+    volumes:
+      - .:/var/www
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+    networks:
+      - rtbnet
+
+networks:
+  rtbnet:
+
+volumes:
+  dbdata:
